@@ -173,7 +173,7 @@ if __name__ == '__main__':
 
     # Pymp (dynamic scheduling)
     import pymp
-    errors = pymp.shared.array((sweep_stop - sweep_start, %table-nr(AllenSDK_variables)))
+    errors = pymp.shared.array((sweep_stop - sweep_start, 4))
     with pymp.Parallel() as p:
         for i in p.xrange(0, sweep_stop - sweep_start):
             errors[i] = sim_sweep(stim_nums[sweep_start:sweep_stop][i], do_plot)
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     #errors = pool.map(sim_sweep, stim_nums[sweep_start:sweep_stop])
 
     # Serial
-    #errors = np.zeros((sweep_stop - sweep_start, %table-nr(AllenSDK_variables)))
+    #errors = np.zeros((sweep_stop - sweep_start, 4))
     #for i,num in enumerate(stim_nums[sweep_start:sweep_stop]):
         #errors[i] = sim_sweep(num, do_plot)
 
