@@ -6,3 +6,5 @@ Based on the AIBS GLIF neuron [technical whitepaper](http://help.brain-map.org/d
 Implementation details and interaction with AIBS files based on AllenSDK [GLIF models](https://alleninstitute.github.io/AllenSDK/glif_models.html).
 
 Also includes [BluePyOpt](https://github.com/BlueBrain/BluePyOpt) evaluator templates for fitting parameters to experimental traces.
+
+Python code is generated from templates using the [C%:cmod](https://gitlab.com/seirios/cmod) metaprogramming processor.
