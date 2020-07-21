@@ -46,6 +46,7 @@ if __name__ == '__main__':
     import brian2 as b2
     b2.prefs.codegen.target = 'cython'
 
+    # Read files from Allen Brain Atlas: Cell Types
     neuron_config = json_utilities.read(sys.argv[1])
     ephys_sweeps = json_utilities.read(sys.argv[2])
     ephys_file_name = sys.argv[3]
