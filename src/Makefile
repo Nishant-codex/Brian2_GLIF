@@ -11,15 +11,15 @@ all: $(ALL_TARGETS)
 
 # BluePyOpt evaluators
 $(GLIF_EVALUATOR): GLIF_%_Evaluator.py: GLIF_%.hm GLIF_Evaluator_template.pym
-	cat $^ | cmod -g > $@
+	cmod -g -o $@ $^
 
 # Read AllenSDK files and compare results
 $(GLIF_ALLENSDK): GLIF_%_AllenSDK.py: GLIF_%.hm GLIF_%_AllenSDK.hm GLIF_AllenSDK_template.pym
-	cat $^ | cmod -g > $@
+	cmod -g -o $@ $^
 
 # Brian2 models
 $(GLIF_MODELS): GLIF_%.py: GLIF_%.hm GLIF_template.pym
-	cat $^ | cmod -g > $@
+	cmod -g -o $@ $^
 
 PREFIX := ../
 
