@@ -1,17 +1,20 @@
 #!/bin/env python
 
 import brian2
+import os
 setattr(brian2.units, 'none', 1.0)  # add brian2.units.none so metaprogramming works
 
 # Run Brian2 simulation with external input
 def run_brian_sim(stim, dt, init_values, param_dict, method = 'exact'):
     # Model specification
-    eqs = brian2.Equations("")
-    eqs += brian2.Equations("dV/dt = 1 / C * (Ie(t) + I_0 + I_1 - G * (V - El)) : volt (unless refractory)")
-    eqs += brian2.Equations("dTh_s/dt = -b_s * Th_s : volt (unless refractory)")
-    eqs += brian2.Equations("dTh_v/dt = a_v * (V - El) - b_v * (Th_v - Th_inf) : volt (unless refractory)")
-    eqs += brian2.Equations("dI_0/dt = -k_0 * I_0 : amp (unless refractory)")
-    eqs += brian2.Equations("dI_1/dt = -k_1 * I_1 : amp (unless refractory)")
+    pid = os.getpid()
+    print('running ',pid)  
+    eqs   = brian2.Equations("")
+    eqs  += brian2.Equations("dV/dt = 1 / C * (Ie(t) + I_0 + I_1 - G * (V - El)) : volt (unless refractory)")
+    eqs  += brian2.Equations("dTh_s/dt = -b_s * Th_s : volt (unless refractory)")
+    eqs  += brian2.Equations("dTh_v/dt = a_v * (V - El) - b_v * (Th_v - Th_inf) : volt (unless refractory)")
+    eqs  += brian2.Equations("dI_0/dt = -k_0 * I_0 : amp (unless refractory)")
+    eqs  += brian2.Equations("dI_1/dt = -k_1 * I_1 : amp (unless refractory)")
     reset = ""
     reset = "\n".join([reset, "V = a_r * V + b_r"])
     reset = "\n".join([reset, "Th_s = Th_s + a_s"])
@@ -21,22 +24,23 @@ def run_brian_sim(stim, dt, init_values, param_dict, method = 'exact'):
     threshold = "V > Th_v + Th_s"
     refractory = param_dict['t_ref']
 
-    Ie = brian2.TimedArray(stim, dt=dt)
-    nrn = brian2.NeuronGroup(1, eqs, method=method, reset=reset, threshold=threshold, refractory=refractory, namespace=param_dict)
-    nrn.V = init_values['V'] * brian2.units.volt
-    nrn.Th_s = init_values['Th_s'] * brian2.units.volt
-    nrn.Th_v = init_values['Th_v'] * brian2.units.volt
-    nrn.I_0 = init_values['I_0'] * brian2.units.amp
-    nrn.I_1 = init_values['I_1'] * brian2.units.amp
+    Ie       = brian2.TimedArray(stim, dt=dt)
+    nrn      = brian2.NeuronGroup(1, eqs, method=method, reset=reset, threshold=threshold, refractory=refractory, namespace=param_dict)
+    nrn.V    = init_values['V_init']  * brian2.units.volt
+    nrn.Th_s = init_values['Th_s']    * brian2.units.volt
+    nrn.Th_v = init_values['Th_v']    * brian2.units.volt
+    nrn.I_0  = init_values['I_0']     * brian2.units.amp
+    nrn.I_1  = init_values['I_1']     * brian2.units.amp
 
     monvars = ['V','Th_s','Th_v','I_0','I_1',]
     mon = brian2.StateMonitor(nrn, monvars, record=True)
+    spks = brian2.SpikeMonitor(nrn)
 
     num_step = len(stim)
     brian2.defaultclock.dt = dt
     brian2.run(num_step * dt)
 
-    return (mon.t / brian2.units.second, mon.V[0] / brian2.units.volt, mon.Th_s[0] / brian2.units.volt, mon.Th_v[0] / brian2.units.volt, mon.I_0[0] / brian2.units.amp, mon.I_1[0] / brian2.units.amp, )
+    return (mon.t / brian2.units.second, mon.V[0] / brian2.units.volt, mon.Th_s[0] / brian2.units.volt, mon.Th_v[0] / brian2.units.volt, mon.I_0[0] / brian2.units.amp, mon.I_1[0] / brian2.units.amp, spks)
 
 
 def add_parameter_units(param_dict):

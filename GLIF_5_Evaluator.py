@@ -10,14 +10,14 @@ import brian2 as b2
 b2.prefs.codegen.target = 'cython'
 
 class Evaluator(bpop.evaluators.Evaluator):
-    def __init__(self, input_current, dt, init_values, parameters, fitness, target_voltage):
+    def __init__(self, input_current, dt, init_values, parameters, fitness, target_voltage,target_spiketimes):
         self.input_current = input_current
         self.dt = dt
         self.init_values = init_values
         self.parameters = parameters
         self.fitness = fitness
         self.target_voltage = target_voltage
-
+        self.target_spiketimes = target_spiketimes 
         super(Evaluator, self).__init__(
                 objectives=[x for x in fitness.keys()],
                 params=[
@@ -97,14 +97,18 @@ class Evaluator(bpop.evaluators.Evaluator):
 
         # Simulate with parameter set
         param_dict_units = glif_model.add_parameter_units(param_dict)
-        t, V, Th_s, Th_v, I_0, I_1,  = glif_model.run_brian_sim(
+        t, V, Th_s, Th_v, I_0, I_1,spks  = glif_model.run_brian_sim(
                 self.input_current * b2.amp,
                 self.dt * b2.second,
                 self.init_values,
                 param_dict_units)
 
         #Evaluate fitness
-        fitness = {x: self.fitness[x](t, self.target_voltage, V) for x in self.fitness.keys()}
+        T = len(V)/20
+        data_spike_times = self.target_spiketimes
+        model_spike_times = np.array(spks.spike_trains()[0])*1000        
+        # fitness = {x: self.fitness[x]( self.target_voltage, V) for x in self.fitness.keys()}
+        fitness = {x: self.fitness[x](model_spike_times, data_spike_times, 5, T, self.dt ,) for x in self.fitness.keys()}
 
         b2.device.delete(force = True)
         b2.device.reinit()

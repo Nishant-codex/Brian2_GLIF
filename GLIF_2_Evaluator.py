@@ -61,21 +61,21 @@ class Evaluator(bpop.evaluators.Evaluator):
                 )
 
     def evaluate_with_dicts(self, param_dict):
-        b2.set_device('cpp_standalone')
+        # b2.set_device('cpp_standalone')
 
         # Simulate with parameter set
         param_dict_units = glif_model.add_parameter_units(param_dict)
-        t, V, Th_s,  = glif_model.run_brian_sim(
+        t, V, Th_s, spks = glif_model.run_brian_sim(
                 self.input_current * b2.amp,
                 self.dt * b2.second,
                 self.init_values,
                 param_dict_units)
 
         #Evaluate fitness
-        fitness = {x: self.fitness[x](t, self.target_voltage, V) for x in self.fitness.keys()}
-
-        b2.device.delete(force = True)
-        b2.device.reinit()
+        fitness = {x: self.fitness[x](self.target_voltage, V) for x in self.fitness.keys()}
+        print(fitness)
+        # b2.device.delete(force = True)
+        # b2.device.reinit()
 
         return fitness
 
@@ -83,3 +83,7 @@ class Evaluator(bpop.evaluators.Evaluator):
         param_dict = glif_model.parameters_from_list(param_list)
         fitness = self.evaluate_with_dicts(param_dict)
         return np.array([fitness[x] for x in fitness.keys()])
+    
+    def init_simulator_and_evaluate_with_lists(self, param_list):
+        """Calls evaluate_with_lists. Is called during IBEA optimisation."""
+        return self.evaluate_with_lists(param_list)
