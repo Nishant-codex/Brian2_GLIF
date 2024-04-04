@@ -15,7 +15,7 @@ def run_brian_sim(stim, dt, init_values, param_dict, method = 'exact'):
     reset = ""
     reset = "\n".join([reset, "V = V_reset"])
     threshold = "V > Th_inf"
-    # threshold.join('V(t+1)=50')
+    threshold.join('V(t+1)=50')
     refractory = param_dict['t_ref']
 
     Ie = brian2.TimedArray(stim, dt=dt)

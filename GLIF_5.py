@@ -39,17 +39,17 @@ def run_brian_sim(stim, dt, init_values, param_dict, method = 'exact'):
     num_step = len(stim)
     brian2.defaultclock.dt = dt
     brian2.run(num_step * dt)
-
+    print('finished ',pid)
     return (mon.t / brian2.units.second, mon.V[0] / brian2.units.volt, mon.Th_s[0] / brian2.units.volt, mon.Th_v[0] / brian2.units.volt, mon.I_0[0] / brian2.units.amp, mon.I_1[0] / brian2.units.amp, spks)
 
 
 def add_parameter_units(param_dict):
     param_dict_units = {
-        'El': param_dict['El'] * brian2.units.volt,
-        'C': param_dict['C'] * brian2.units.farad,
-        'G': param_dict['G'] * brian2.units.siemens,
+        'El':     param_dict['El'] * brian2.units.volt,
+        'C':      param_dict['C'] * brian2.units.farad,
+        'G':      param_dict['G'] * brian2.units.siemens,
         'Th_inf': param_dict['Th_inf'] * brian2.units.volt,
-        't_ref': param_dict['t_ref'] * brian2.units.second,
+        't_ref':  param_dict['t_ref'] * brian2.units.second,
         'a_r': param_dict['a_r'] * brian2.units.none,
         'b_r': param_dict['b_r'] * brian2.units.volt,
         'a_s': param_dict['a_s'] * brian2.units.volt,

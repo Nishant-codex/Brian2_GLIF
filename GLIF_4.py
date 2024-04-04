@@ -1,11 +1,15 @@
 #!/bin/env python
 
 import brian2
+import os
 setattr(brian2.units, 'none', 1.0)  # add brian2.units.none so metaprogramming works
 
 # Run Brian2 simulation with external input
 def run_brian_sim(stim, dt, init_values, param_dict, method = 'exact'):
     # Model specification
+    pid = os.getpid()
+    print('running ',pid)  
+
     eqs = brian2.Equations("")
     eqs += brian2.Equations("dV/dt = 1 / C * (Ie(t) + I_0 + I_1 - G * (V - El)) : volt (unless refractory)")
     eqs += brian2.Equations("dTh_s/dt = -b_s * Th_s : volt (unless refractory)")
@@ -21,19 +25,20 @@ def run_brian_sim(stim, dt, init_values, param_dict, method = 'exact'):
 
     Ie = brian2.TimedArray(stim, dt=dt)
     nrn = brian2.NeuronGroup(1, eqs, method=method, reset=reset, threshold=threshold, refractory=refractory, namespace=param_dict)
-    nrn.V = init_values['V'] * brian2.units.volt
+    nrn.V = init_values['V_init'] * brian2.units.volt
     nrn.Th_s = init_values['Th_s'] * brian2.units.volt
     nrn.I_0 = init_values['I_0'] * brian2.units.amp
     nrn.I_1 = init_values['I_1'] * brian2.units.amp
 
     monvars = ['V','Th_s','I_0','I_1',]
     mon = brian2.StateMonitor(nrn, monvars, record=True)
+    spks = brian2.SpikeMonitor(nrn)
 
     num_step = len(stim)
     brian2.defaultclock.dt = dt
     brian2.run(num_step * dt)
-
-    return (mon.t / brian2.units.second, mon.V[0] / brian2.units.volt, mon.Th_s[0] / brian2.units.volt, mon.I_0[0] / brian2.units.amp, mon.I_1[0] / brian2.units.amp, )
+    print('finished ', pid)
+    return (mon.t / brian2.units.second, mon.V[0] / brian2.units.volt, mon.Th_s[0] / brian2.units.volt, mon.I_0[0] / brian2.units.amp, mon.I_1[0] / brian2.units.amp, spks  )
 
 
 def add_parameter_units(param_dict):
