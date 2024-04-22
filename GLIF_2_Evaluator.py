@@ -22,7 +22,7 @@ class Evaluator(bpop.evaluators.Evaluator):
                 objectives=[x for x in fitness.keys()],
                 params=[
                     Parameter('El',
-                        value = parameters['El']['value'],
+                        value =  parameters['El']['value'],
                         bounds = parameters['El']['bounds'],
                         frozen = parameters['El']['frozen']),
                     Parameter('C',

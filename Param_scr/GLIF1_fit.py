@@ -12,7 +12,6 @@ from GLIF_1_Evaluator import Evaluator
 from GLIF_1 import * 
 from utils import *
 import matplotlib.pyplot as plt
-
 parameters = {'El':     {'value':-52.249/1000,'bounds':[-0.056,-0.051],   'frozen':True},
               'C':      {'value':0.028e-9,    'bounds':[27e-12, 29e-12],  'frozen':True},
               'G':      {'value':8.374e-9,    'bounds':[8.33e-9,8.375e-9],'frozen':True},

@@ -6,14 +6,15 @@ from bluepyopt.parameters import Parameter
 from time import time as wall_time
 import os
 import brian2 as b2
-sys.path.append('C:/Users/Nishant Joshi/Documents/Siamese_net/Brian2_GLIF_AllenSDK')
+sys.path.append('C:/Users/Nishant Joshi/Documents/GLIF/Brian2_GLIF_AllenSDK')
 sys.path.append('C:/Users/Nishant Joshi/Downloads/Old_code/repo/single_cell_analysis/scripts')
 from GLIF_2_Evaluator import Evaluator
 from GLIF_2 import * 
 from utils import *
 import matplotlib.pyplot as plt
 
-parameters = {'El':     {'value':-52.249/1000,'bounds':[-0.056,-0.051],   'frozen':True},
+parameters = {
+              'El':     {'value':-52.249/1000,'bounds':[-0.056,-0.051],   'frozen':True},
               'C':      {'value':0.028e-9,    'bounds':[27e-12, 29e-12],  'frozen':True},
               'G':      {'value':8.374e-9,    'bounds':[8.33e-9,8.375e-9],'frozen':True},
               't_ref':  {'value':4/1000,      'bounds':[0.0035,0.005],    'frozen':True},
@@ -117,38 +118,6 @@ def get_gamma_factor(model, data, delta, time, dt, rate_correction=True):
 
 
 
-class HHBrianEvaluator(bpop.evaluators.Evaluator):
-    def __init__(self, input_current, dt,init_value,target_voltage):
-        self.input_current = input_current
-        self.dt = dt
-        self.init = init_value
-        self.target_voltage = target_voltage
-        super(HHBrianEvaluator, self).__init__(objectives=['RMS'],
-                                               params=[Parameter('El', bounds=[-0.08,-0.02]),
-                                                       Parameter('C', bounds=[20e-12, 50e-12]),
-                                                       Parameter('G', bounds=[2e-9,10e-9]),
-                                                       Parameter('t_ref', bounds=[0.001,0.01]),
-                                                       Parameter('Th_inf', bounds=[-0.02, -0.08]),
-                                                       Parameter('V_reset', bounds=[-0.060,-0.02]),                                                       
-                                                       ])
-    
-    def evaluate_with_dicts(self, param_dict):
-        t, voltage = run_brian_sim(self.input_current, self.dt,self.init, param_dict,)
-        return {'RMS': np.array([np.sqrt(np.mean((voltage - self.target_voltage)**2))])}
-    
-    def evaluate_with_lists(self, param_list):
-        El,C,G,t_ref,Th_inf,V_reset = param_list
-        param_dict = {'El':El,
-                      'C':C,
-                      'G':G,
-                      't_ref':t_ref,
-                      'Th_inf':Th_inf,
-                      'V_reset':V_reset}
-        
-        return [self.evaluate_with_dicts(param_dict)['RMS']]
-    def init_simulator_and_evaluate_with_lists(self, param_list):
-        """Calls evaluate_with_lists. Is called during IBEA optimisation."""
-        return self.evaluate_with_lists(param_list)
 
 if __name__ == "__main__":
     start_time = wall_time()
@@ -176,7 +145,7 @@ if __name__ == "__main__":
     num_proc = 4
 
     with multiprocessing.Pool(num_proc) as p:
-        opt = bpop.deapext.optimisations.DEAPOptimisation(eva,map_function=p.map )
+        opt = bpop.deapext.optimisations.DEAPOptimisation(eva ) #,map_function=p.map
         final_pop, hall_of_fame, logs, hist = opt.run(max_ngen=20,)
     print(f"Done in {wall_time() - start_time:10.3f}")
 
